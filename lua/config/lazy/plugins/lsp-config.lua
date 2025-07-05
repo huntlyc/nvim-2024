@@ -1,34 +1,46 @@
-vim.api.nvim_create_autocmd("LspAttach", {
-    callback = function(args)
-        local bufnr = args.buf
-        local client = vim.lsp.get_client_by_id(args.data.client_id)
+-- lua/config/lsp.lua (for example)
 
-
-        -- format on save
-        vim.api.nvim_create_autocmd('BufWritePre', {
-            buffer = args.buf,
-            callback = function()
-                vim.lsp.buf.format({ bufnr = bufnr, id = client.id })
-            end,
+local lsp_format_on_save = function(client, bufnr)
+  if client.supports_method("textDocument/formatting") then
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      buffer = bufnr,
+      callback = function()
+        vim.lsp.buf.format({
+          bufnr = bufnr,
+          filter = function(c)
+            return c.id == client.id
+          end,
         })
-        -- LSP && Telescope mappings
-        local opts = { noremap = true, silent = true }
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "K", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gg", "<cmd>lua vim.diagnostic.open_float()<CR>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gd", "<cmd>lua vim.lsp.buf.definition()<CR>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gr", "<cmd>lua vim.lsp.buf.rename()<CR>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gb", "<cmd>lua vim.diagnostic.goto_next()<CR>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gp", "<cmd>lua vim.diagnostic.goto_prev()<CR>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gtr", "<cmd>Telescope lsp_references<cr>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>gl", "<cmd>Telescope diagnostics<cr>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
-        vim.api.nvim_buf_set_keymap(bufnr, "n", "<leader>ca", "<cmd>lua vim.lsp.buf.code_action()<cr>", opts)
-    end
+      end,
+    })
+  end
+end
+
+local lsp_keymaps = function(bufnr)
+  local keymap = vim.keymap.set
+  local opts = { buffer = bufnr, silent = true, noremap = true }
+
+  keymap("n", "K", vim.lsp.buf.hover, opts)
+  keymap("n", "<leader>gg", vim.diagnostic.open_float, opts)
+  keymap("n", "<leader>gd", vim.lsp.buf.definition, opts)
+  keymap("n", "<leader>gt", vim.lsp.buf.type_definition, opts)
+  keymap("n", "<leader>gi", vim.lsp.buf.implementation, opts)
+  keymap("n", "<leader>gr", vim.lsp.buf.rename, opts)
+  keymap("n", "<leader>gb", vim.diagnostic.goto_next, opts)
+  keymap("n", "<leader>gp", vim.diagnostic.goto_prev, opts)
+  keymap("n", "<leader>gtr", "<cmd>Telescope lsp_references<CR>", opts)
+  keymap("n", "<leader>gl", "<cmd>Telescope diagnostics<CR>", opts)
+  keymap("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+end
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(args)
+    local bufnr = args.buf
+    local client = vim.lsp.get_client_by_id(args.data.client_id)
+    lsp_keymaps(bufnr)
+    lsp_format_on_save(client, bufnr)
+  end,
 })
-
-
 
 
 return {
@@ -159,3 +171,5 @@ return {
         end
     }
 }
+
+
