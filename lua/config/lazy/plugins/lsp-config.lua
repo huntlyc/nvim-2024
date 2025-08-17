@@ -274,7 +274,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 return {
     {
         "neovim/nvim-lspconfig",
-        dependancies = {
+        dependencies = {
             "saghen/blink.cmp",
             "folke/lazydev.nvim",
             ft = "lua", -- only load on lua files
@@ -294,123 +294,6 @@ return {
                 float = {
                     border = "rounded",
                     source = "always", -- Show source in floating windows
-                },
-            })
-            local capabilities = require("blink.cmp").get_lsp_capabilities()
-
-            require("lspconfig").gopls.setup({
-                capabilities = capabilities,
-                filetypes = { "go", "gomod" },
-            })
-
-            require("lspconfig").intelephense.setup({
-                capabilities = capabilities,
-                init_options = {
-                    licenceKey = os.getenv("INTELEPHENSELICENCE"),
-                },
-                filetypes = { "php", "phtml" },
-                settings = {
-                    intelephense = {
-                        format = {
-                            braces = "k&r",
-                        },
-                        maxMemory = 4096,
-                        stubs = {
-                            "bcmath",
-                            "bz2",
-                            "calendar",
-                            "Core",
-                            "curl",
-                            "date",
-                            "dba",
-                            "dom",
-                            "enchant",
-                            "fileinfo",
-                            "filter",
-                            "ftp",
-                            "gd",
-                            "gettext",
-                            "hash",
-                            "iconv",
-                            "imap",
-                            "intl",
-                            "json",
-                            "ldap",
-                            "libxml",
-                            "mbstring",
-                            "mcrypt",
-                            "mysql",
-                            "mysqli",
-                            "password",
-                            "pcntl",
-                            "pcre",
-                            "PDO",
-                            "pdo_mysql",
-                            "Phar",
-                            "readline",
-                            "recode",
-                            "Reflection",
-                            "regex",
-                            "session",
-                            "SimpleXML",
-                            "soap",
-                            "sockets",
-                            "sodium",
-                            "SPL",
-                            "standard",
-                            "superglobals",
-                            "sysvsem",
-                            "sysvshm",
-                            "tokenizer",
-                            "xml",
-                            "xdebug",
-                            "xmlreader",
-                            "xmlwriter",
-                            "yaml",
-                            "zip",
-                            "zlib",
-                            "wordpress",
-                            "woocommerce",
-                            "acf-pro",
-                            "wordpress-globals",
-                        },
-                        environment = {
-                            includePaths = {
-                                "~/.composer/vendor/php-stubs",
-                                "~/code/wordpress",
-                            },
-                        },
-                        files = {
-                            maxSize = 5000000,
-                        },
-                    },
-                },
-            })
-
-            require("lspconfig").lua_ls.setup({
-                on_init = function(client)
-                    if client.workspace_folders then
-                        local path = client.workspace_folders[1].name
-                        if vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc") then
-                            return
-                        end
-                    end
-
-                    client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
-                        runtime = {
-                            version = "LuaJIT",
-                        },
-                        -- Make the server aware of Neovim runtime files
-                        workspace = {
-                            checkThirdParty = false,
-                            library = {
-                                vim.env.VIMRUNTIME,
-                            },
-                        },
-                    })
-                end,
-                settings = {
-                    Lua = {},
                 },
             })
         end,
