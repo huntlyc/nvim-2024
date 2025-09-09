@@ -7,18 +7,23 @@ return {
                     icons = {
                         package_installed = "✓",
                         package_pending = "➜",
-                        package_uninstalled = "✗"
-                    }
-                }
+                        package_uninstalled = "✗",
+                    },
+                },
             })
-        end
+        end,
     },
     {
         "williamboman/mason-lspconfig.nvim",
-        dependencies = { "mason.nvim", "nvim-lspconfig" },
-        opts = function()
+        dependencies = { 
+            "williamboman/mason.nvim", 
+            "neovim/nvim-lspconfig",
+            "saghen/blink.cmp",
+        },
+        config = function()
             local capabilities = require("blink.cmp").get_lsp_capabilities()
-            
+            local setup_servers = {} -- Track which servers we've already set up
+
             -- Server configurations
             local servers = {
                 gopls = {
@@ -110,7 +115,9 @@ return {
                     on_init = function(client)
                         if client.workspace_folders then
                             local path = client.workspace_folders[1].name
-                            if vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc") then
+                            if
+                                vim.loop.fs_stat(path .. "/.luarc.json") or vim.loop.fs_stat(path .. "/.luarc.jsonc")
+                            then
                                 return
                             end
                         end
@@ -133,7 +140,38 @@ return {
                     },
                 },
                 -- Web development servers
-                ts_ls = {},
+                ts_ls = {
+                    filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+                    init_options = {
+                        preferences = {
+                            disableSuggestions = false,
+                        }
+                    },
+                    settings = {
+                        typescript = {
+                            inlayHints = {
+                                includeInlayParameterNameHints = "all",
+                                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                                includeInlayFunctionParameterTypeHints = true,
+                                includeInlayVariableTypeHints = true,
+                                includeInlayPropertyDeclarationTypeHints = true,
+                                includeInlayFunctionLikeReturnTypeHints = true,
+                                includeInlayEnumMemberValueHints = true,
+                            }
+                        },
+                        javascript = {
+                            inlayHints = {
+                                includeInlayParameterNameHints = "all",
+                                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                                includeInlayFunctionParameterTypeHints = true,
+                                includeInlayVariableTypeHints = true,
+                                includeInlayPropertyDeclarationTypeHints = true,
+                                includeInlayFunctionLikeReturnTypeHints = true,
+                                includeInlayEnumMemberValueHints = true,
+                            }
+                        }
+                    }
+                },
                 html = {},
                 cssls = {},
                 somesass_ls = {},
@@ -142,28 +180,41 @@ return {
                 jsonls = {},
             }
 
-            return {
+            require('mason-lspconfig').setup({
                 ensure_installed = {
-                    "gopls",           -- Go
-                    "intelephense",    -- PHP
-                    "lua_ls",          -- Lua
-                    "ts_ls",           -- TypeScript/JavaScript
-                    "html",            -- HTML
-                    "cssls",           -- CSS
-                    "somesass_ls",     -- Sass/SCSS
-                    "tailwindcss",     -- Tailwind CSS
-                    "eslint",          -- ESLint
-                    "jsonls",          -- JSON
+                    "gopls", -- Go
+                    "intelephense", -- PHP
+                    "lua_ls", -- Lua
+                    "ts_ls", -- TypeScript/JavaScript
+                    "html", -- HTML
+                    "cssls", -- CSS
+                    "somesass_ls", -- Sass/SCSS
+                    "tailwindcss", -- Tailwind CSS
+                    "eslint", -- ESLint
+                    "jsonls", -- JSON
                 },
                 automatic_installation = true,
                 handlers = {
                     function(server_name)
-                        local server_config = servers[server_name] or {}
-                        server_config.capabilities = capabilities
-                        require("lspconfig")[server_name].setup(server_config)
+                        if not setup_servers[server_name] then
+                            setup_servers[server_name] = true
+                            local server_config = servers[server_name] or {}
+                            server_config.capabilities = capabilities
+                            require("lspconfig")[server_name].setup(server_config)
+                        end
                     end,
-                }
-            }
-        end
-    }
+                },
+            })
+            
+            -- Setup ts_ls with better root detection
+            local util = require('lspconfig.util')
+            require("lspconfig").ts_ls.setup({
+                capabilities = capabilities,
+                filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
+                root_dir = util.root_pattern("package.json", "tsconfig.json", ".git"),
+                single_file_support = true, -- Allow single files without project structure
+            })
+        end,
+    },
 }
+

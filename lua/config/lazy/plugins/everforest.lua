@@ -10,8 +10,8 @@ return {
                 -- Your config here
                 background = "hard",
             })
-            vim.cmd.set("background=light")
-            vim.cmd.colorscheme("everforest")
+            -- vim.cmd.set("background=light")
+            -- 	vim.cmd.colorscheme("everforest")
         end,
     },
 }
