@@ -15,8 +15,8 @@ return {
     },
     {
         "williamboman/mason-lspconfig.nvim",
-        dependencies = { 
-            "williamboman/mason.nvim", 
+        dependencies = {
+            "williamboman/mason.nvim",
             "neovim/nvim-lspconfig",
             "saghen/blink.cmp",
         },
@@ -145,7 +145,7 @@ return {
                     init_options = {
                         preferences = {
                             disableSuggestions = false,
-                        }
+                        },
                     },
                     settings = {
                         typescript = {
@@ -157,7 +157,7 @@ return {
                                 includeInlayPropertyDeclarationTypeHints = true,
                                 includeInlayFunctionLikeReturnTypeHints = true,
                                 includeInlayEnumMemberValueHints = true,
-                            }
+                            },
                         },
                         javascript = {
                             inlayHints = {
@@ -168,9 +168,9 @@ return {
                                 includeInlayPropertyDeclarationTypeHints = true,
                                 includeInlayFunctionLikeReturnTypeHints = true,
                                 includeInlayEnumMemberValueHints = true,
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 },
                 html = {},
                 cssls = {},
@@ -180,7 +180,7 @@ return {
                 jsonls = {},
             }
 
-            require('mason-lspconfig').setup({
+            require("mason-lspconfig").setup({
                 ensure_installed = {
                     "gopls", -- Go
                     "intelephense", -- PHP
@@ -205,10 +205,10 @@ return {
                     end,
                 },
             })
-            
+
             -- Setup ts_ls with better root detection
-            local util = require('lspconfig.util')
-            require("lspconfig").ts_ls.setup({
+            local util = require("lspconfig.util")
+            vim.lsp.config("ts_ls", {
                 capabilities = capabilities,
                 filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
                 root_dir = util.root_pattern("package.json", "tsconfig.json", ".git"),
@@ -217,4 +217,3 @@ return {
         end,
     },
 }
-
