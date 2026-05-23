@@ -23,19 +23,18 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
     command = [[%s/\s\+$//e]],
 })
 
-vim.keymap.set("n", "<leader><leader>x", "<cmd>source %<CR>")       -- source the current file, used for editing this file
-vim.keymap.set("n", "<leader>x", ":.lua<CR>")                       -- run current line
-vim.keymap.set("v", "<leader>x", ":.lua<CR>")                       -- run selection
+vim.keymap.set("n", "<leader><leader>x", "<cmd>source %<CR>", { desc = "Source current file" })
+vim.keymap.set("n", "<leader>x", ":.lua<CR>", { desc = "Run current line" })
+vim.keymap.set("v", "<leader>x", ":.lua<CR>", { desc = "Run selection" })
 
-vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true }) -- stop space from moving the cursor in normal/visual mode
-vim.keymap.set('n', '<leader><leader>l', '<cmd>nohlsearch<CR>')
-vim.keymap.set('', 'gf', '<cmd>edit <cfile><CR>')                   -- go to non-existant file
+vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true, desc = "Disable space cursor movement" })
+vim.keymap.set('n', '<leader><leader>l', '<cmd>nohlsearch<CR>', { desc = "Clear search highlight" })
+vim.keymap.set('', 'gf', '<cmd>edit <cfile><CR>', { desc = "Open file under cursor" })
 
--- reselect visual selection after indent change
-vim.keymap.set('v', '<', '<gv')
-vim.keymap.set('v', '>', '>gv')
+vim.keymap.set('v', '<', '<gv', { desc = "Indent left and reselect" })
+vim.keymap.set('v', '>', '>gv', { desc = "Indent right and reselect" })
 
-vim.keymap.set('n', '<leader>gx', '<cmd>!xdg-open %<cr><cr>') -- open links in firefox or whatever
+vim.keymap.set('n', '<leader>gx', '<cmd>!xdg-open %<cr><cr>', { desc = "Open file in system app" })
 
 
 vim.keymap.set("n", "<esc>", function()
@@ -47,35 +46,32 @@ vim.keymap.set("n", "<esc>", function()
     vim.cmd(":noh")
 end, { silent = true, desc = "Remove Search Highlighting, Dismiss Popups" })
 
--- quick wins
-vim.keymap.set('n', '<leader>w', '<cmd>w<CR>')        -- save
-vim.keymap.set('n', '<leader>q', '<cmd>q<CR>')        -- quit
-vim.keymap.set('n', '<leader>cb', '<cmd>clo<CR>')     -- close buffer
-vim.keymap.set('n', '<leader>cab', '<cmd>%bd|e#<CR>') -- close all other buffers except current
-vim.keymap.set('v', "<leader>y", "\"+y")              -- copy to system clipboard
-vim.keymap.set('n', "<leader>Y", "\"+Y")              -- copy to system clipboard
-vim.keymap.set('n', "Y", "yg$")                       -- copy to end of line
-vim.keymap.set('n', "n", "nzzzv")                     -- center screen on search next
-vim.keymap.set('n', "N", "Nzzzv")                     -- center screen on search prev
-vim.keymap.set('n', "J", "mzJ`z")                     -- join lines without moving cursor
-vim.keymap.set('n', "<C-d>", "<C-d>zz")               -- scroll down but keep cursor in same place
-vim.keymap.set('n', "<C-u>", "<C-u>zz")               -- scroll up but keep cursor in same place
+vim.keymap.set('n', '<leader>w', '<cmd>w<CR>', { desc = "Save file" })
+vim.keymap.set('n', '<leader>q', '<cmd>q<CR>', { desc = "Quit" })
+vim.keymap.set('n', '<leader>cb', '<cmd>clo<CR>', { desc = "Close buffer" })
+vim.keymap.set('n', '<leader>cab', '<cmd>%bd|e#<CR>', { desc = "Close all other buffers" })
+vim.keymap.set('v', "<leader>y", "\"+y", { desc = "Copy to system clipboard" })
+vim.keymap.set('n', "<leader>Y", "\"+Y", { desc = "Copy line to system clipboard" })
+vim.keymap.set('n', "Y", "yg$", { desc = "Yank to end of line" })
+vim.keymap.set('n', "n", "nzzzv", { desc = "Next search result (centered)" })
+vim.keymap.set('n', "N", "Nzzzv", { desc = "Prev search result (centered)" })
+vim.keymap.set('n', "J", "mzJ`z", { desc = "Join lines (keep cursor)" })
+vim.keymap.set('n', "<C-d>", "<C-d>zz", { desc = "Scroll down (centered)" })
+vim.keymap.set('n', "<C-u>", "<C-u>zz", { desc = "Scroll up (centered)" })
 
--- window navigation
-vim.keymap.set('n', "<C-h>", "<C-w>h") -- move to left window
-vim.keymap.set('n', "<C-j>", "<C-w>j") -- move to bottom window
-vim.keymap.set('n', "<C-k>", "<C-w>k") -- move to top window
-vim.keymap.set('n', "<C-l>", "<C-w>l") -- move to right window
+vim.keymap.set('n', "<C-h>", "<C-w>h", { desc = "Window left" })
+vim.keymap.set('n', "<C-j>", "<C-w>j", { desc = "Window down" })
+vim.keymap.set('n', "<C-k>", "<C-w>k", { desc = "Window up" })
+vim.keymap.set('n', "<C-l>", "<C-w>l", { desc = "Window right" })
 
--- buffer navigation
-vim.keymap.set('n', '<leader>bn', '<cmd>bnext<CR>')     -- next buffer
-vim.keymap.set('n', '<leader>[', '<cmd>bnext<CR>')      -- next buffer
+vim.keymap.set('n', '<leader>bn', '<cmd>bnext<CR>', { desc = "Next buffer" })
+vim.keymap.set('n', '<leader>[', '<cmd>bnext<CR>', { desc = "Next buffer" })
 
-vim.keymap.set('n', '<leader>bp', '<cmd>bprevious<CR>') -- previous buffer
-vim.keymap.set('n', '<leader>]', '<cmd>bprevious<CR>')  -- previous buffer
+vim.keymap.set('n', '<leader>bp', '<cmd>bprevious<CR>', { desc = "Previous buffer" })
+vim.keymap.set('n', '<leader>]', '<cmd>bprevious<CR>', { desc = "Previous buffer" })
 
-vim.keymap.set('v', "J", ":m '>+1<CR>gv=gv")            -- move line down in visual mode
-vim.keymap.set('v', "K", ":m '<-2<CR>gv=gv")            -- move line up in visual mode
+vim.keymap.set('v', "J", ":m '>+1<CR>gv=gv", { desc = "Move line down" })
+vim.keymap.set('v', "K", ":m '<-2<CR>gv=gv", { desc = "Move line up" })
 
 -- vim.keymap.set('n', '<leader>=', '<cmd>Neoformat<CR>') -- format code
 
@@ -85,9 +81,8 @@ vim.keymap.set('v', "K", ":m '<-2<CR>gv=gv")            -- move line up in visua
 
 
 
--- copilot
-vim.keymap.set('i', '<C-.>', '<Plug>copilot-next', { noremap = false })
-vim.keymap.set('i', '<C-,>', '<Plug>copilot-previous', { noremap = false })
+vim.keymap.set('i', '<C-.>', '<Plug>copilot-next', { noremap = false, desc = "Copilot next suggestion" })
+vim.keymap.set('i', '<C-,>', '<Plug>copilot-previous', { noremap = false, desc = "Copilot previous suggestion" })
 
 
 

@@ -30,9 +30,6 @@ return {
                     filetypes = { "go", "gomod" },
                 },
                 intelephense = {
-                    init_options = {
-                        licenceKey = os.getenv("INTELEPHENSELICENCE"),
-                    },
                     filetypes = { "php", "phtml" },
                     settings = {
                         intelephense = {
@@ -41,59 +38,8 @@ return {
                             },
                             maxMemory = 4096,
                             stubs = {
-                                "bcmath",
-                                "bz2",
-                                "calendar",
                                 "Core",
-                                "curl",
-                                "date",
-                                "dba",
-                                "dom",
-                                "enchant",
-                                "fileinfo",
-                                "filter",
-                                "ftp",
-                                "gd",
-                                "gettext",
-                                "hash",
-                                "iconv",
-                                "imap",
-                                "intl",
-                                "json",
-                                "ldap",
-                                "libxml",
-                                "mbstring",
-                                "mcrypt",
-                                "mysql",
-                                "mysqli",
-                                "password",
-                                "pcntl",
-                                "pcre",
-                                "PDO",
-                                "pdo_mysql",
-                                "Phar",
-                                "readline",
-                                "recode",
-                                "Reflection",
-                                "regex",
-                                "session",
-                                "SimpleXML",
-                                "soap",
-                                "sockets",
-                                "sodium",
-                                "SPL",
                                 "standard",
-                                "superglobals",
-                                "sysvsem",
-                                "sysvshm",
-                                "tokenizer",
-                                "xml",
-                                "xdebug",
-                                "xmlreader",
-                                "xmlwriter",
-                                "yaml",
-                                "zip",
-                                "zlib",
                                 "wordpress",
                                 "woocommerce",
                                 "acf-pro",
@@ -101,8 +47,7 @@ return {
                             },
                             environment = {
                                 includePaths = {
-                                    "~/.composer/vendor/php-stubs",
-                                    "~/code/wordpress",
+                                    "/home/huntlyc/code/docker-wp/wp/themes/AtomIc/vendor/php-stubs",
                                 },
                             },
                             files = {
@@ -178,6 +123,21 @@ return {
                 tailwindcss = {},
                 eslint = {},
                 jsonls = {},
+                rust_analyzer = {
+                    settings = {
+                        ["rust-analyzer"] = {
+                            check = { command = "clippy" },
+                            inlayHints = {
+                                bindingModeHints = { enable = true },
+                                chainingHints = { enable = true },
+                                closingBraceHints = { enable = true, minLines = 25 },
+                                lifetimeElisionHints = { enable = "always" },
+                                parameterHints = { enable = true },
+                                typeHints = { enable = true },
+                            },
+                        },
+                    },
+                },
             }
 
             require("mason-lspconfig").setup({
@@ -192,6 +152,7 @@ return {
                     "tailwindcss", -- Tailwind CSS
                     "eslint", -- ESLint
                     "jsonls", -- JSON
+                    "rust_analyzer", -- Rust
                 },
                 automatic_installation = true,
                 handlers = {
@@ -200,20 +161,18 @@ return {
                             setup_servers[server_name] = true
                             local server_config = servers[server_name] or {}
                             server_config.capabilities = capabilities
-                            require("lspconfig")[server_name].setup(server_config)
+                            vim.lsp.config(server_name, server_config)
                         end
                     end,
                 },
             })
 
-            -- Setup ts_ls with better root detection
+            -- Setup ts_ls with better root detection (merge with existing config)
             local util = require("lspconfig.util")
-            vim.lsp.config("ts_ls", {
-                capabilities = capabilities,
-                filetypes = { "typescript", "typescriptreact", "javascript", "javascriptreact" },
-                root_dir = util.root_pattern("package.json", "tsconfig.json", ".git"),
-                single_file_support = true, -- Allow single files without project structure
-            })
+            local ts_ls_config = servers["ts_ls"] or {}
+            ts_ls_config.root_dir = util.root_pattern("package.json", "tsconfig.json", ".git")
+            ts_ls_config.single_file_support = true
+            vim.lsp.config("ts_ls", ts_ls_config)
         end,
     },
 }
