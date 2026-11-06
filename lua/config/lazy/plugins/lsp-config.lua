@@ -1,7 +1,7 @@
 -- lua/config/lsp.lua (for example)
 
 local lsp_format_on_save = function(client, bufnr)
-    if client.supports_method("textDocument/formatting") then
+    if client:supports_method("textDocument/formatting") then
         vim.api.nvim_create_autocmd("BufWritePre", {
             buffer = bufnr,
             callback = function()
@@ -265,9 +265,9 @@ end
 vim.api.nvim_create_autocmd("LspAttach", {
     callback = function(args)
         local bufnr = args.buf
-        local client = vim.lsp.get_client_by_id(args.data.client_id)
         lsp_keymaps(bufnr)
-        lsp_format_on_save(client, bufnr)
+        -- local client = vim.lsp.get_client_by_id(args.data.client_id)
+        -- lsp_format_on_save(client, bufnr)
     end,
 })
 
@@ -277,7 +277,7 @@ return {
         dependencies = {
             "saghen/blink.cmp",
             "folke/lazydev.nvim",
-            ft = "lua", -- only load on lua files
+            ft = "lua",
             opts = {
                 library = {
                     { path = "${3rd}/luv/library", words = { "vim%.uv" } },
@@ -296,6 +296,122 @@ return {
                     source = "always", -- Show source in floating windows
                 },
             })
-        end,
-    },
+
+            local capabilities = require('blink.cmp').get_lsp_capabilities()
+
+            -- Machine-local overrides live in gitignored lua/config/local.lua
+            -- (e.g. client work paths on a specific machine).
+            local local_lsp = {}
+            local has_local, local_mod = pcall(require, 'config.local')
+            if has_local then local_lsp = local_mod end
+
+            --- 1. Intelephense Configuration
+            vim.lsp.config('intelephense', {
+                capabilities = capabilities,
+                init_options = {
+                    licenceKey = os.getenv('INTELEPHENSELICENCE'),
+                },
+                filetypes = { "php", "phtml" },
+                settings = {
+                    intelephense = {
+                        format = { braces = "k&r" },
+                        maxMemory = 4096,
+                        stubs = {
+                            "bcmath", "bz2", "calendar", "Core", "curl", "date", "dba", "dom",
+                            "enchant", "fileinfo", "filter", "ftp", "gd", "gettext", "hash",
+                            "iconv", "imap", "intl", "json", "ldap", "libxml", "mbstring",
+                            "mcrypt", "mysql", "mysqli", "password", "pcntl", "pcre", "PDO",
+                            "pdo_mysql", "Phar", "readline", "recode", "Reflection", "regex",
+                            "session", "SimpleXML", "soap", "sockets", "sodium", "SPL",
+                            "standard", "superglobals", "sysvsem", "sysvshm", "tokenizer",
+                            "xml", "xdebug", "xmlreader", "xmlwriter", "yaml", "zip", "zlib",
+                            "wordpress", "woocommerce", "acf-pro", "wordpress-globals",
+                        },
+                        environment = {
+                            includePaths = vim.list_extend(
+                                { vim.fn.expand('~/.composer/vendor/php-stubs') },
+                                local_lsp.intelephense_include_paths or {}
+                            ),
+                        },
+                        files = { maxSize = 5000000 },
+                    }
+                }
+            })
+
+            --- 2. Gopls Configuration
+            vim.lsp.config('gopls', {
+                capabilities = capabilities,
+                settings = {
+                    gopls = {
+                        analyses = { unusedparams = true },
+                        staticcheck = true,
+                        gofumpt = true,
+                    },
+                },
+            })
+
+            --- 3. TypeScript Configuration (ts_ls)
+            vim.lsp.config('ts_ls', {
+                capabilities = capabilities,
+            })
+
+            --- 4. Lua Configuration
+            vim.lsp.config('lua_ls', {
+                on_init = function(client)
+                    if client.workspace_folders then
+                        local path = client.workspace_folders[1].name
+                        if vim.uv.fs_stat(path .. '/.luarc.json') or vim.uv.fs_stat(path .. '/.luarc.jsonc') then
+                            return
+                        end
+                    end
+
+                    client.config.settings.Lua = vim.tbl_deep_extend('force', client.config.settings.Lua, {
+                        runtime = { version = 'LuaJIT' },
+                        workspace = {
+                            checkThirdParty = false,
+                            library = { vim.env.VIMRUNTIME }
+                        }
+                    })
+                end,
+                settings = {
+                    Lua = {}
+                }
+            })
+
+
+            vim.lsp.config('cssls', {
+                capabilities = capabilities,
+            })
+
+            vim.lsp.config('emmet_ls', {
+                capabilities = capabilities,
+                filetypes = { 'html', 'typescriptreact', 'javascriptreact', 'css', 'sass', 'scss', 'less','php' },
+                init_options = {
+                  html = {
+                    options = {
+                      -- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
+                      ["bem.enabled"] = true,
+                    },
+                  },
+                }
+            })
+
+            vim.lsp.config("rust_analyzer", {
+                capabilities = capabilities,
+                settings = {
+                    ["rust-analyzer"] = {
+                        inlayHints = {
+                            bindingModeHints = { enable = true },
+                            chainingHints = { enable = true },
+                            closingBraceHints = { enable = true, minLines = 25 },
+                            lifetimeElisionHints = { enable = "always" },
+                            parameterHints = { enable = true },
+                            typeHints = { enable = true },
+                        },
+                    },
+                },
+            })
+            vim.lsp.enable("rust_analyzer")
+        end
+    }
 }

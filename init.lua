@@ -1,5 +1,29 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.opt.exrc = true
+vim.opt.secure = true
+
+-- Auto-trust project-local config files (e.g. .nvim.lua) under these prefixes,
+-- so `nvim .` inside your own projects never hits the trust prompt.
+-- Add any other roots you own to this list.
+vim.g.trusted_project_prefixes = {
+    vim.fs.normalize(vim.env.HOME .. "/Projects"),
+}
+
+local secure_read = vim.secure.read
+function vim.secure.read(path)
+    local full = vim.uv.fs_realpath(vim.fs.normalize(path))
+    if full then
+        for _, prefix in ipairs(vim.g.trusted_project_prefixes) do
+            if vim.startswith(full, prefix) then
+                vim.secure.trust({ path = full, action = "allow" })
+                break
+            end
+        end
+    end
+    return secure_read(path)
+end
+
 vim.opt.expandtab = true
 vim.opt.shiftwidth = 4
 vim.opt.tabstop = 4
@@ -81,9 +105,15 @@ vim.keymap.set('v', "K", ":m '<-2<CR>gv=gv", { desc = "Move line up" })
 
 
 
-vim.keymap.set('i', '<C-.>', '<Plug>copilot-next', { noremap = false, desc = "Copilot next suggestion" })
-vim.keymap.set('i', '<C-,>', '<Plug>copilot-previous', { noremap = false, desc = "Copilot previous suggestion" })
 
+
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "css", "scss", "sass" },
+    callback = function()
+        vim.opt_local.shiftwidth = 4
+        vim.opt_local.tabstop = 4
+    end,
+})
 
 
 

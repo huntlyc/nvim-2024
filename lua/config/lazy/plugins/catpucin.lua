@@ -6,6 +6,15 @@ local function load_theme(flavour)
 				light = "latte",
 				dark = flavour,
 			},
+			-- Theme setup reloads on startup/focus; keep ghost styling in the theme.
+			custom_highlights = {
+				llama_hl_fim_hint = {
+					fg = "#6c7086",
+					ctermfg = 243,
+					italic = true,
+					cterm = { italic = true },
+				},
+			},
 		})
 		vim.g.catppuccin_flavour = flavour
 		vim.cmd([[colorscheme catppuccin]])
